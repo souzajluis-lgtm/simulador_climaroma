@@ -3,139 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Climaroma - Soluções Inteligentes</title>
+    <title>Climaroma - Simulador Ecobrisa RJ</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --primary: #004a99; --secondary: #218838; --bg: #f8f9fa; --text: #2d3436; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        :root { --primary: #004a99; --secondary: #218838; --bg: #f1f2f6; --text: #2d3436; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .container { width: 100%; max-width: 500px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin: 15px; position: relative; overflow: hidden; }
-        
-        /* Barra de Progresso */
-        .progress-bar { position: absolute; top: 0; left: 0; height: 6px; background: var(--primary); transition: width 0.4s ease; width: 33%; }
+        .container { width: 100%; max-width: 450px; background: white; padding: 35px; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin: 15px; position: relative; }
+        .progress-bar { position: absolute; top: 0; left: 0; height: 8px; background: var(--primary); transition: width 0.5s ease; border-radius: 25px 25px 0 0; }
 
-        .step { display: none; animation: slideIn 0.4s ease forwards; }
+        .step { display: none; animation: fadeIn 0.5s ease; }
         .step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        h2 { color: var(--primary); font-size: 24px; line-height: 1.2; margin-bottom: 10px; }
+        p.carioca-talk { font-style: italic; color: #535c68; margin-bottom: 25px; border-left: 4px solid #f9ca24; padding-left: 15px; font-size: 15px; }
 
-        h2 { color: var(--primary); font-size: 24px; margin-bottom: 10px; }
-        p.subtitle { color: #636e72; margin-bottom: 25px; font-size: 14px; }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; color: #7f8c8d; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #dfe6e9; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--primary); }
 
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-        input, select { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: 0.3s; box-sizing: border-box; }
-        input:focus { border-color: var(--primary); outline: none; }
+        .btn { background: var(--primary); color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-        .btn-next { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-next:hover { background: #003366; }
-
-        /* Card de Produto Final */
-        .product-card { border: 2px solid #eee; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center; }
-        .product-img { width: 150px; height: 150px; background: #eee; margin: 0 auto 15px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; }
-        .eco-badge { background: #e8f5e9; color: var(--secondary); padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-
-        .whatsapp-cta { background: #25d366; color: white; text-decoration: none; display: block; text-align: center; padding: 18px; border-radius: 10px; font-weight: bold; margin-top: 25px; font-size: 18px; }
+        .result-box { background: #e8f5e9; padding: 20px; border-radius: 15px; margin-top: 20px; text-align: center; border: 1px solid #c3e6cb; }
+        .whatsapp-cta { background: #25d366; color: white; text-decoration: none; display: block; padding: 18px; border-radius: 12px; font-weight: bold; margin-top: 20px; text-align: center; font-size: 18px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="progress-bar" id="progress"></div>
+    <div class="progress-bar" id="progress" style="width: 25%;"></div>
 
-    <div class="step active" id="step1">
-        <h2>Vamos começar! 📏</h2>
-        <p class="subtitle">Informe as dimensões do seu galpão para o cálculo técnico.</p>
+    <div class="step active" id="step0">
+        <h2>E aí, beleza? 👋</h2>
+        <p class="carioca-talk" id="textoCarioca"></p>
+        
         <div class="input-group">
-            <label>Largura (metros)</label>
-            <input type="number" id="largura" placeholder="Ex: 20">
+            <label>Qual o seu nome?*</label>
+            <input type="text" id="leadNome" placeholder="Ex: João Silva">
         </div>
         <div class="input-group">
-            <label>Comprimento (metros)</label>
-            <input type="number" id="comprimento" placeholder="Ex: 50">
+            <label>Seu WhatsApp*</label>
+            <input type="tel" id="leadZap" placeholder="(21) 99999-9999">
         </div>
-        <div class="input-group">
-            <label>Pé Direito (Altura)</label>
-            <input type="number" id="altura" placeholder="Ex: 8">
-        </div>
-        <button class="btn-next" onclick="nextStep(2)">Próximo passo →</button>
+        <button class="btn" onclick="validarLead()">Bora resolver esse calor! →</button>
+    </div>
+
+    <div class="step" id="step1">
+        <h2>Manda as medidas! 📐</h2>
+        <p class="carioca-talk">O pé direito é alto? Se for, a gente bota pra gelar legal.</p>
+        <div class="input-group"><label>Largura (m)</label><input type="number" id="largura" placeholder="0"></div>
+        <div class="input-group"><label>Comprimento (m)</label><input type="number" id="comprimento" placeholder="0"></div>
+        <div class="input-group"><label>Pé Direito (m)</label><input type="number" id="altura" placeholder="0"></div>
+        <button class="btn" onclick="nextStep(2)">Próximo passo →</button>
     </div>
 
     <div class="step" id="step2">
-        <h2>Quase lá... ⚡</h2>
-        <p class="subtitle">Qual o nível de calor ou atividade no local?</p>
+        <h2>Qual é a do local? ⚡</h2>
+        <p class="carioca-talk">Se for fábrica com máquina ligada, o calor fica sinistro.</p>
         <div class="input-group">
-            <label>Tipo de Operação</label>
+            <label>Nível de Atividade</label>
             <select id="tr">
-                <option value="45">Galpão Logístico / Depósito (Normal)</option>
-                <option value="50">Produção / Indústria (Intenso)</option>
+                <option value="45">Logística / Depósito (45 trocas/h)</option>
+                <option value="50">Indústria / Calor Intenso (50 trocas/h)</option>
             </select>
         </div>
-        <div class="input-group">
-            <label>Seu nome (Opcional)</label>
-            <input type="text" id="nomeCliente" placeholder="Como prefere ser chamado?">
-        </div>
-        <button class="btn-next" onclick="gerarResultado()">Ver Solução Ideal e Economia →</button>
+        <button class="btn" onclick="gerarCalculo()">Gerar Solução Real →</button>
     </div>
 
     <div class="step" id="step3">
-        <h2 id="saudacao">Excelente escolha!</h2>
-        <p class="subtitle">Com base na engenharia Ecobrisa, este é o seu projeto:</p>
-        
-        <div class="product-card">
-            <div class="eco-badge">90% MAIS ECONÔMICO QUE AR-CONDICIONADO</div>
-            <div class="product-img">
-                <img src="https://climaroma.com.br/wp-content/uploads/2023/ebv50.png" alt="Ecobrisa" style="max-width:100%; border-radius:10px;" onerror="this.innerHTML='Imagem do Equipamento'">
-            </div>
-            <h3 id="resEquipamento" style="margin:0;">Modelo Sugerido</h3>
-            <p id="resQtd" style="font-size: 18px; color: var(--primary); font-weight: bold;"></p>
-            <p style="font-size: 13px; color: #666;">Vazão Total de Projeto: <span id="resVazao"></span> m³/h</p>
+        <h2 id="finalTitulo">Tá na mão! ❄️</h2>
+        <div class="result-box">
+            <p style="margin:0; font-size: 14px;">Modelo sugerido pela Climaroma:</p>
+            <h3 id="resModelo" style="margin: 10px 0; color: var(--primary);"></h3>
+            <p id="resQtd" style="font-size: 22px; font-weight: bold; margin: 0;"></p>
         </div>
 
-        <div style="background: #f1f2f6; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
-            <p style="margin:0; font-size: 14px;">Economia estimada de:</p>
-            <strong style="font-size: 20px; color: var(--secondary);">R$ <span id="resEconomia"></span> /mês</strong>
+        <div style="text-align: center; margin: 20px 0; background: #fff3cd; padding: 15px; border-radius: 12px;">
+            <p style="color: #856404; font-weight: bold; margin: 0;">💰 Economia Mensal:</p>
+            <span style="font-size: 24px; font-weight: bold; color: var(--secondary);">R$ <span id="resEconomia"></span></span>
+            <p style="font-size: 11px; color: #856404;">(Comparado ao consumo de Ar Condicionado)</p>
         </div>
 
-        <a href="#" id="wppFinal" target="_blank" class="whatsapp-btn whatsapp-cta">
-            SOLICITAR ORÇAMENTO OFICIAL
-        </a>
+        <a href="#" id="wppLink" target="_blank" class="whatsapp-cta">RECEBER PROPOSTA NO MEU ZAP</a>
     </div>
 </div>
 
 <script>
+    const frases = [
+        "Cara, ainda bem que você chegou. O calor no RJ não é para os fracos, não!",
+        "Mermão, esse calor tá sinistro! Vamos lá que eu vou te ajudar a resolver isso agora.",
+        "Fala sério, 40 graus na sombra? Vamos botar esse galpão no gelo!",
+        "No Rio, se não climatizar, o pessoal derrete antes do almoço. Bora?",
+        "Chega de sofrer com esse sol de rachar o coco. Vamos calcular a solução!"
+    ];
+
+    document.getElementById('textoCarioca').innerText = frases[Math.floor(Math.random() * frases.length)];
+
     function nextStep(step) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById('step' + step).classList.add('active');
         document.getElementById('progress').style.width = (step * 33.3) + '%';
     }
 
-    function gerarResultado() {
-        const L = parseFloat(document.getElementById('largura').value);
-        const C = parseFloat(document.getElementById('comprimento').value);
-        const H = parseFloat(document.getElementById('altura').value);
-        const TR = parseInt(document.getElementById('tr').value);
-        const nome = document.getElementById('nomeCliente').value || "Cliente";
+    function validarLead() {
+        const nome = document.getElementById('leadNome').value;
+        const zap = document.getElementById('leadZap').value;
+        if(nome.length < 3 || zap.length < 8) {
+            alert("Ih, mermão! Preenche o nome e o Zap aí pra gente avançar!");
+            return;
+        }
+        nextStep(1);
+    }
 
-        const vazao = L * C * H * TR;
-        const modelo = vazao > 150000 ? {nome: "EBV-90 Industrial", cap: 85000} : {nome: "EBV-50 Profissional", cap: 50000};
+    function gerarCalculo() {
+        const L = parseFloat(document.getElementById('largura').value) || 0;
+        const C = parseFloat(document.getElementById('comprimento').value) || 0;
+        const H = parseFloat(document.getElementById('altura').value) || 0;
+        const TR = parseInt(document.getElementById('tr').value);
+        const nome = document.getElementById('leadNome').value;
+        const zap = document.getElementById('leadZap').value;
+
+        const volume = L * C * H;
+        const vazao = volume * TR;
+        
+        // Lógica de equipamento
+        const modelo = vazao > 160000 ? {n: "EBV-90 Industrial", cap: 85000} : {n: "EBV-50 Profissional", cap: 50000};
         const qtd = Math.ceil(vazao / modelo.cap);
         
-        // Cálculo de economia (Simulado)
+        // Cálculo de economia (Baseado nos seus manuais: Climatizador gasta 10% do AC)
         const economia = (vazao / 50000) * 1.8 * 220 * 1.15 * 9; 
 
-        document.getElementById('saudacao').innerText = `Parabéns, ${nome}!`;
-        document.getElementById('resEquipamento').innerText = modelo.nome;
-        document.getElementById('resQtd').innerText = `${qtd} Unidade(s)`;
-        document.getElementById('resVazao').innerText = vazao.toLocaleString();
+        document.getElementById('finalTitulo').innerText = `Boa, ${nome.split(' ')[0]}!`;
+        document.getElementById('resModelo').innerText = modelo.n;
+        document.getElementById('resQtd').innerText = `${qtd} EQUIPAMENTO(S)`;
         document.getElementById('resEconomia').innerText = economia.toLocaleString('pt-BR', {minimumFractionDigits: 2});
 
-        const msgWpp = `Olá Climaroma! Acabei de fazer a simulação técnica.%0A%0A*Resultados:*%0A👤 Nome: ${nome}%0A📐 Vazão: ${vazao.toLocaleString()} m³/h%0A⚙️ Equipamento: ${qtd}x ${modelo.nome}%0A💰 Economia prevista: R$ ${economia.toLocaleString('pt-BR')}%0A%0AQuero transformar meu projeto em realidade!`;
+        const numDono = "5521979498338"; // SEU NÚMERO ATUALIZADO
+        const msg = `*SIMULAÇÃO CLIMAROMA*%0A👤 *Lead:* ${nome}%0A📱 *Zap:* ${zap}%0A📐 *Vazão:* ${vazao.toLocaleString()} m³/h%0A⚙️ *Equipamento:* ${qtd}x ${modelo.n}%0A💰 *Economia:* R$ ${economia.toLocaleString('pt-BR')}`;
         
-        document.getElementById('wppFinal').href = `https://wa.me/5521979498338?text=${msgWpp}`; // Coloquei o número do Bernardo do seu print, mude se precisar!
+        document.getElementById('wppLink').href = `https://wa.me/${numDono}?text=${msg}`;
 
         nextStep(3);
-        confetti({ duration: 2000, particleCount: 100, origin: { y: 0.6 } });
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
 </script>
 
