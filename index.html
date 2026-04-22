@@ -3,168 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Climaroma - Simulador de Engenharia Ecobrisa</title>
+    <title>Climaroma - Soluções Inteligentes</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --blue: #004a99; --green: #218838; --light: #f4f7f6; --dark: #333; --blueprint-bg: #003366; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #ced6e0; color: var(--dark); margin: 0; padding: 15px; }
-        .app-container { max-width: 1100px; margin: auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        :root { --primary: #004a99; --secondary: #218838; --bg: #f8f9fa; --text: #2d3436; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        /* Header Profissional */
-        .header { background: var(--blue); color: white; padding: 25px; text-align: center; border-bottom: 5px solid #002d5e; }
-        .header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; }
-        .header p { margin: 5px 0 0; opacity: 0.9; font-weight: 300; }
-
-        .content { padding: 30px; }
-        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .container { width: 100%; max-width: 500px; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin: 15px; position: relative; overflow: hidden; }
         
-        .card { background: var(--light); padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 13px; color: var(--blue); }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        /* Barra de Progresso */
+        .progress-bar { position: absolute; top: 0; left: 0; height: 6px; background: var(--primary); transition: width 0.4s ease; width: 33%; }
 
-        .btn-calc { background: var(--blue); color: white; border: none; width: 100%; padding: 20px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .btn-calc:hover { background: #002d5e; transform: translateY(-2px); }
+        .step { display: none; animation: slideIn 0.4s ease forwards; }
+        .step.active { display: block; }
 
-        /* Resultado Estilo Projeto Técnico */
-        #resultado { display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; animation: fadeIn 0.8s; }
-        .res-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; }
-        
-        .blueprint { background: var(--blueprint-bg); color: #a5d8ff; padding: 25px; border-radius: 8px; font-family: 'Courier New', monospace; border: 2px dashed #4facfe; position: relative; }
-        .blueprint h3 { color: white; border-bottom: 1px solid #4facfe; padding-bottom: 5px; margin-top: 0; }
-        
-        .equipment-card { background: white; color: var(--dark); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 10px solid var(--green); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .tag-rec { background: var(--green); color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
-        .eco-banner { background: #e8f5e9; padding: 25px; border-radius: 8px; text-align: center; border: 2px solid var(--green); grid-column: span 2; margin-top: 20px; }
-        .eco-banner h2 { margin: 0; color: var(--green); font-size: 32px; }
+        h2 { color: var(--primary); font-size: 24px; margin-bottom: 10px; }
+        p.subtitle { color: #636e72; margin-bottom: 25px; font-size: 14px; }
 
-        .whatsapp-btn { background: #25d366; color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 18px; border-radius: 8px; font-weight: bold; margin-top: 25px; font-size: 18px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 800px) { .res-grid { grid-template-columns: 1fr; } .eco-banner { grid-column: span 1; } }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; transition: 0.3s; box-sizing: border-box; }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .btn-next { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-next:hover { background: #003366; }
+
+        /* Card de Produto Final */
+        .product-card { border: 2px solid #eee; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: center; }
+        .product-img { width: 150px; height: 150px; background: #eee; margin: 0 auto 15px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; }
+        .eco-badge { background: #e8f5e9; color: var(--secondary); padding: 8px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+
+        .whatsapp-cta { background: #25d366; color: white; text-decoration: none; display: block; text-align: center; padding: 18px; border-radius: 10px; font-weight: bold; margin-top: 25px; font-size: 18px; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header">
-        <h1>CLIMAROMA</h1>
-        <p>Soluções em Climatização Industrial - Rio de Janeiro</p>
+<div class="container">
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="step active" id="step1">
+        <h2>Vamos começar! 📏</h2>
+        <p class="subtitle">Informe as dimensões do seu galpão para o cálculo técnico.</p>
+        <div class="input-group">
+            <label>Largura (metros)</label>
+            <input type="number" id="largura" placeholder="Ex: 20">
+        </div>
+        <div class="input-group">
+            <label>Comprimento (metros)</label>
+            <input type="number" id="comprimento" placeholder="Ex: 50">
+        </div>
+        <div class="input-group">
+            <label>Pé Direito (Altura)</label>
+            <input type="number" id="altura" placeholder="Ex: 8">
+        </div>
+        <button class="btn-next" onclick="nextStep(2)">Próximo passo →</button>
     </div>
 
-    <div class="content">
-        <div class="grid-inputs">
-            <div class="card">
-                <label>LARGURA (m)</label>
-                <input type="number" id="largura" placeholder="Ex: 30">
+    <div class="step" id="step2">
+        <h2>Quase lá... ⚡</h2>
+        <p class="subtitle">Qual o nível de calor ou atividade no local?</p>
+        <div class="input-group">
+            <label>Tipo de Operação</label>
+            <select id="tr">
+                <option value="45">Galpão Logístico / Depósito (Normal)</option>
+                <option value="50">Produção / Indústria (Intenso)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Seu nome (Opcional)</label>
+            <input type="text" id="nomeCliente" placeholder="Como prefere ser chamado?">
+        </div>
+        <button class="btn-next" onclick="gerarResultado()">Ver Solução Ideal e Economia →</button>
+    </div>
+
+    <div class="step" id="step3">
+        <h2 id="saudacao">Excelente escolha!</h2>
+        <p class="subtitle">Com base na engenharia Ecobrisa, este é o seu projeto:</p>
+        
+        <div class="product-card">
+            <div class="eco-badge">90% MAIS ECONÔMICO QUE AR-CONDICIONADO</div>
+            <div class="product-img">
+                <img src="https://climaroma.com.br/wp-content/uploads/2023/ebv50.png" alt="Ecobrisa" style="max-width:100%; border-radius:10px;" onerror="this.innerHTML='Imagem do Equipamento'">
             </div>
-            <div class="card">
-                <label>COMPRIMENTO (m)</label>
-                <input type="number" id="comprimento" placeholder="Ex: 40">
-            </div>
-            <div class="card">
-                <label>PÉ DIREITO (m)</label>
-                <input type="number" id="altura" placeholder="Ex: 10">
-            </div>
-            <div class="card">
-                <label>RENOVAÇÃO (TR/h)</label>
-                <select id="tr">
-                    <option value="45">45 Trocas (Recomendado RJ)</option>
-                    <option value="50">50 Trocas (Áreas Críticas)</option>
-                </select>
-            </div>
+            <h3 id="resEquipamento" style="margin:0;">Modelo Sugerido</h3>
+            <p id="resQtd" style="font-size: 18px; color: var(--primary); font-weight: bold;"></p>
+            <p style="font-size: 13px; color: #666;">Vazão Total de Projeto: <span id="resVazao"></span> m³/h</p>
         </div>
 
-        <button class="btn-calc" onclick="calcular()">GERAR MEMORIAL TÉCNICO E ECONOMIA</button>
-
-        <div id="resultado">
-            <div class="res-grid">
-                <div class="blueprint">
-                    <h3>DETALHAMENTO TÉCNICO</h3>
-                    <p>» ÁREA TOTAL: <span id="outArea"></span> m²</p>
-                    <p>» VOLUME TOTAL: <span id="outVol"></span> m³</p>
-                    <p>» VAZÃO REQUERIDA: <span id="outVazao"></span> m³/h</p>
-                    <hr style="border: 0; border-top: 1px solid #4facfe;">
-                    <p style="font-size: 12px;">PROJETO: CLIMAROMA DISTRIBUIDOR ECOBRISA<br>LOCALIDADE: ESTADO DO RIO DE JANEIRO</p>
-                </div>
-
-                <div>
-                    <h3>EQUIPAMENTOS SUGERIDOS</h3>
-                    <div id="opcoes"></div>
-                </div>
-
-                <div class="eco-banner">
-                    <p style="text-transform: uppercase; font-weight: bold; color: #666; margin-bottom: 5px;">Comparativo Mensal de Energia</p>
-                    <h2>90% DE ECONOMIA</h2>
-                    <p>Ar Condicionado: <del>R$ <span id="custoAC"></span></del></p>
-                    <p>Sistema Ecobrisa: <strong>R$ <span id="custoEco"></span></strong></p>
-                    <p style="font-size: 14px; color: #444;">Economia real de <strong>R$ <span id="economia"></span></strong> por mês.</p>
-                </div>
-            </div>
-
-            <a href="#" id="linkWpp" target="_blank" class="whatsapp-btn">
-                ENVIAR PROPOSTA PARA WHATSAPP
-            </a>
+        <div style="background: #f1f2f6; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center;">
+            <p style="margin:0; font-size: 14px;">Economia estimada de:</p>
+            <strong style="font-size: 20px; color: var(--secondary);">R$ <span id="resEconomia"></span> /mês</strong>
         </div>
+
+        <a href="#" id="wppFinal" target="_blank" class="whatsapp-btn whatsapp-cta">
+            SOLICITAR ORÇAMENTO OFICIAL
+        </a>
     </div>
 </div>
 
 <script>
-    function calcular() {
+    function nextStep(step) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        document.getElementById('progress').style.width = (step * 33.3) + '%';
+    }
+
+    function gerarResultado() {
         const L = parseFloat(document.getElementById('largura').value);
         const C = parseFloat(document.getElementById('comprimento').value);
         const H = parseFloat(document.getElementById('altura').value);
         const TR = parseInt(document.getElementById('tr').value);
+        const nome = document.getElementById('nomeCliente').value || "Cliente";
 
-        if(!L || !C || !H) { alert("Informe as medidas do galpão."); return; }
-
-        const area = L * C;
-        const volume = area * H;
-        const vazao = volume * TR;
-
-        // Dados baseados nos manuais Ecobrisa
-        const equipamentos = [
-            { nome: "EBV-50 (Padrão)", vazao: 50000, pot: 1.8 },
-            { nome: "EBV-90 (Alta Vazão)", vazao: 85000, pot: 3.2 }
-        ];
-
-        document.getElementById('outArea').innerText = area.toFixed(2);
-        document.getElementById('outVol').innerText = volume.toFixed(2);
-        document.getElementById('outVazao').innerText = vazao.toLocaleString('pt-BR');
-
-        let html = "";
-        let msgWpp = `*PROPOSTA CLIMAROMA*%0A📍 Local: ${area}m² | TR: ${TR}%0A💨 Vazão: ${vazao.toLocaleString()} m³/h%0A%0A*EQUIPAMENTOS SUGERIDOS:*%0A`;
-
-        equipamentos.forEach((eq, index) => {
-            const qtd = Math.ceil(vazao / eq.vazao);
-            const isRec = (vazao > 150000 && index === 1) || (vazao <= 150000 && index === 0);
-            
-            html += `
-                <div class="equipment-card">
-                    ${isRec ? '<span class="tag-rec">MAIS INDICADO</span>' : ''}
-                    <div style="margin-top:5px;"><strong>${eq.nome}</strong></div>
-                    <span>Quantidade: <strong>${qtd} un.</strong></span>
-                </div>
-            `;
-            if(isRec) msgWpp += `👉 ${qtd}x ${eq.nome}%0A`;
-        });
-
-        document.getElementById('opcoes').innerHTML = html;
-
-        // Lógica Econômica (Tarifa RJ aprox R$ 1,15)
-        const totalPotencia = (Math.ceil(vazao / 50000) * 1.8);
-        const gastoEco = totalPotencia * 220 * 1.15; // 220h/mês
-        const gastoAC = gastoEco * 10;
-        const economia = gastoAC - gastoEco;
-
-        document.getElementById('custoEco').innerText = gastoEco.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-        document.getElementById('custoAC').innerText = gastoAC.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-        document.getElementById('economia').innerText = economia.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-
-        msgWpp += `%0A💰 *Economia Mensal:* R$ ${economia.toLocaleString('pt-BR')}%0A_Gerado por Climaroma Simulador_`;
+        const vazao = L * C * H * TR;
+        const modelo = vazao > 150000 ? {nome: "EBV-90 Industrial", cap: 85000} : {nome: "EBV-50 Profissional", cap: 50000};
+        const qtd = Math.ceil(vazao / modelo.cap);
         
-        document.getElementById('linkWpp').href = `https://wa.me/5521979498338?text=${msgWpp}`; // Substitua pelo seu número
-        document.getElementById('resultado').style.display = 'block';
-        window.scrollTo(0, document.body.scrollHeight);
+        // Cálculo de economia (Simulado)
+        const economia = (vazao / 50000) * 1.8 * 220 * 1.15 * 9; 
+
+        document.getElementById('saudacao').innerText = `Parabéns, ${nome}!`;
+        document.getElementById('resEquipamento').innerText = modelo.nome;
+        document.getElementById('resQtd').innerText = `${qtd} Unidade(s)`;
+        document.getElementById('resVazao').innerText = vazao.toLocaleString();
+        document.getElementById('resEconomia').innerText = economia.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+        const msgWpp = `Olá Climaroma! Acabei de fazer a simulação técnica.%0A%0A*Resultados:*%0A👤 Nome: ${nome}%0A📐 Vazão: ${vazao.toLocaleString()} m³/h%0A⚙️ Equipamento: ${qtd}x ${modelo.nome}%0A💰 Economia prevista: R$ ${economia.toLocaleString('pt-BR')}%0A%0AQuero transformar meu projeto em realidade!`;
+        
+        document.getElementById('wppFinal').href = `https://wa.me/5521976371747?text=${msgWpp}`; // Coloquei o número do Bernardo do seu print, mude se precisar!
+
+        nextStep(3);
+        confetti({ duration: 2000, particleCount: 100, origin: { y: 0.6 } });
     }
 </script>
 
